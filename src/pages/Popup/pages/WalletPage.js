@@ -8,7 +8,7 @@ import DebugButtons from '../components/DebugButtons';
 export default function WalletPage() {
   const isProdNetwork = useIsProdNetwork();
   return (
-    <Container fixed maxWidth="md">
+    <Container fixed maxWidth="md" style={{ padding: 0 }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <BalancesList />

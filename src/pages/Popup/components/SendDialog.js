@@ -64,9 +64,8 @@ export default function SendDialog({ open, onClose, publicKey, balanceInfo }) {
           >
             <Tab label={`SPL ${swapCoinInfo.ticker}`} />
             <Tab
-              label={`${swapCoinInfo.erc20Contract ? 'ERC20' : 'Native'} ${
-                swapCoinInfo.ticker
-              }`}
+              label={`${swapCoinInfo.erc20Contract ? 'ERC20' : 'Native'} ${swapCoinInfo.ticker
+                }`}
             />
           </Tabs>
         ) : null}
@@ -78,20 +77,20 @@ export default function SendDialog({ open, onClose, publicKey, balanceInfo }) {
             onSubmitRef={onSubmitRef}
           />
         ) : (
-          <SendSwapDialog
-            onClose={onClose}
-            publicKey={publicKey}
-            balanceInfo={balanceInfo}
-            swapCoinInfo={swapCoinInfo}
-            ethAccount={ethAccount}
-            onSubmitRef={onSubmitRef}
-          />
-        )}
+            <SendSwapDialog
+              onClose={onClose}
+              publicKey={publicKey}
+              balanceInfo={balanceInfo}
+              swapCoinInfo={swapCoinInfo}
+              ethAccount={ethAccount}
+              onSubmitRef={onSubmitRef}
+            />
+          )}
       </DialogForm>
       {ethAccount &&
-      (swapCoinInfo?.blockchain === 'eth' || swapCoinInfo?.erc20Contract) ? (
-        <EthWithdrawalCompleter ethAccount={ethAccount} publicKey={publicKey} />
-      ) : null}
+        (swapCoinInfo?.blockchain === 'eth' || swapCoinInfo?.erc20Contract) ? (
+          <EthWithdrawalCompleter ethAccount={ethAccount} publicKey={publicKey} />
+        ) : null}
     </>
   );
 }
@@ -125,8 +124,8 @@ function SendSplDialog({ onClose, publicKey, balanceInfo, onSubmitRef }) {
   onSubmitRef.current = onSubmit;
   return (
     <>
-      <DialogContent>{fields}</DialogContent>
-      <DialogActions>
+      <DialogContent style={{ paddingTop: 16 }}>{fields}</DialogContent>
+      <DialogActions style={{ marginRight: 8, marginBottom: 4 }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button
           type="submit"
@@ -286,23 +285,23 @@ function SendSwapProgress({ publicKey, signature, onClose }) {
             </Link>
           </Typography>
         ) : (
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <div style={{ marginRight: 16 }}>
-              <CircularProgress />
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <div style={{ marginRight: 16 }}>
+                <CircularProgress />
+              </div>
+              {confirms ? (
+                <Typography>{confirms} / 35 Confirmations</Typography>
+              ) : (
+                  <Typography>Transaction Pending</Typography>
+                )}
             </div>
-            {confirms ? (
-              <Typography>{confirms} / 35 Confirmations</Typography>
-            ) : (
-              <Typography>Transaction Pending</Typography>
-            )}
-          </div>
-        )}
+          )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

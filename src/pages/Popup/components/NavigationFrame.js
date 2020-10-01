@@ -46,14 +46,13 @@ export default function NavigationFrame({ children }) {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" className={classes.title} component="h1">
-            Solana SPL Token Wallet
+            SPL Token Wallet
           </Typography>
           <WalletSelector />
           <NetworkSelector />
         </Toolbar>
       </AppBar>
       <main className={classes.content}>{children}</main>
-      <Footer />
     </>
   );
 }
@@ -112,11 +111,12 @@ function NetworkSelector() {
               setEndpoint(network);
             }}
             selected={network === endpoint}
+            style={{ padding: "0px 16px" }}
           >
             <ListItemIcon className={classes.menuItemIcon}>
               {network === endpoint ? <CheckIcon fontSize="small" /> : null}
             </ListItemIcon>
-            {network}
+            <Typography style={{ fontSize: 12 }}>{network}</Typography>
           </MenuItem>
         ))}
       </Menu>
@@ -169,11 +169,12 @@ function WalletSelector() {
               setWalletIndex(index);
             }}
             selected={index === walletIndex}
+            style={{ padding: "0px 16px" }}
           >
             <ListItemIcon className={classes.menuItemIcon}>
               {index === walletIndex ? <CheckIcon fontSize="small" /> : null}
             </ListItemIcon>
-            {address.toBase58()}
+            <Typography style={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis" }}>{address.toBase58()}</Typography>
           </MenuItem>
         ))}
         <Divider />
@@ -182,40 +183,14 @@ function WalletSelector() {
             setAnchorEl(null);
             setWalletIndex(addresses.length);
           }}
+          style={{ padding: "0px 16px" }}
         >
           <ListItemIcon className={classes.menuItemIcon}>
             <AddIcon fontSize="small" />
           </ListItemIcon>
-          Create Account
+          <Typography style={{ fontSize: 12 }}>Create Account</Typography>
         </MenuItem>
       </Menu>
     </>
-  );
-}
-
-const useFooterStyles = makeStyles((theme) => ({
-  footer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    margin: theme.spacing(2),
-  },
-}));
-
-function Footer() {
-  const classes = useFooterStyles();
-  return (
-    <footer className={classes.footer}>
-      <Button
-        variant="outlined"
-        color="primary"
-        component="a"
-        target="_blank"
-        rel="noopener"
-        href="https://github.com/serum-foundation/spl-token-wallet"
-        startIcon={<CodeIcon />}
-      >
-        View Source
-      </Button>
-    </footer>
   );
 }

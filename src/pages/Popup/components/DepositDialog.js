@@ -71,9 +71,8 @@ export default function DepositDialog({
     if (!mint) {
       firstTab = 'SOL';
     } else {
-      secondTab = `${
-        swapInfo.coin.erc20Contract ? 'ERC20' : 'Native'
-      } ${secondTab}`;
+      secondTab = `${swapInfo.coin.erc20Contract ? 'ERC20' : 'Native'
+        } ${secondTab}`;
     }
     tabs = (
       <Tabs
@@ -100,22 +99,20 @@ export default function DepositDialog({
         {tab === 0 ? (
           <>
             {publicKey.equals(owner) ? (
-              <DialogContentText>
-                This address can only be used to receive SOL. Do not send other
+              <DialogContentText style={{ fontSize: 14 }}>
+                This address can only be used to receive SOL. <br />Do not send other
                 tokens to this address.
               </DialogContentText>
             ) : (
-              <DialogContentText>
-                This address can only be used to receive{' '}
-                {tokenSymbol ?? abbreviateAddress(mint)}. Do not send SOL to
+                <DialogContentText style={{ fontSize: 14 }}>
+                  This address can only be used to receive{' '}
+                  {tokenSymbol ?? abbreviateAddress(mint)}. <br />Do not send SOL to
                 this address.
-              </DialogContentText>
-            )}
+                </DialogContentText>
+              )}
             <CopyableDisplay
               value={publicKey.toBase58()}
               label={'Deposit Address'}
-              autoFocus
-              qrCode
             />
             <DialogContentText variant="body2">
               <Link
@@ -131,13 +128,13 @@ export default function DepositDialog({
             </DialogContentText>
           </>
         ) : (
-          <SolletSwapDepositAddress
-            balanceInfo={balanceInfo}
-            swapInfo={swapInfo}
-          />
-        )}
+            <SolletSwapDepositAddress
+              balanceInfo={balanceInfo}
+              swapInfo={swapInfo}
+            />
+          )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions style={{ marginRight: 8, marginBottom: 4 }}>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </DialogForm>
@@ -297,8 +294,8 @@ function MetamaskDeposit({ swapInfo }) {
               {status.confirms ? (
                 <Typography>{status.confirms} / 12 Confirmations</Typography>
               ) : (
-                <Typography>Transaction Pending</Typography>
-              )}
+                  <Typography>Transaction Pending</Typography>
+                )}
               <Typography variant="body2">
                 <Link
                   href={`https://etherscan.io/tx/${status.txid}`}

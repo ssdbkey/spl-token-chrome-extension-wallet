@@ -51,8 +51,8 @@ export default function BalancesList() {
   return (
     <Paper>
       <AppBar position="static" color="default" elevation={1}>
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }} component="h2">
+        <Toolbar style={{ minHeight: 48 }}>
+          <Typography style={{ flexGrow: 1, fontSize: 14 }} component="h2">
             Balances
           </Typography>
           <Tooltip title="Add Token" arrow>
@@ -90,11 +90,16 @@ export default function BalancesList() {
 }
 
 const useStyles = makeStyles((theme) => ({
+  tokenBalance: {
+    fontSize: 14
+  },
   address: {
     textOverflow: 'ellipsis',
     overflowX: 'hidden',
+    fontSize: 12
   },
   itemDetails: {
+    fontSize: 12,
     marginLeft: theme.spacing(3),
     marginRight: theme.spacing(3),
     marginBottom: theme.spacing(2),
@@ -129,6 +134,7 @@ function BalanceListItem({ publicKey }) {
               {tokenSymbol ? ` (${tokenSymbol})` : null}
             </>
           }
+          primaryTypographyProps={{ className: classes.tokenBalance }}
           secondary={publicKey.toBase58()}
           secondaryTypographyProps={{ className: classes.address }}
         />
@@ -188,17 +194,17 @@ function BalanceListItemDetails({ publicKey, balanceInfo }) {
             Send
           </Button>
         </div>
-        <Typography variant="body2" className={classes.address}>
+        <Typography className={classes.address}>
           Deposit Address: {publicKey.toBase58()}
         </Typography>
-        <Typography variant="body2">
+        <Typography style={{ fontSize: 12 }}>
           Token Name: {tokenName ?? 'Unknown'}
         </Typography>
-        <Typography variant="body2">
+        <Typography style={{ fontSize: 12 }}>
           Token Symbol: {tokenSymbol ?? 'Unknown'}
         </Typography>
         {mint ? (
-          <Typography variant="body2" className={classes.address}>
+          <Typography className={classes.address}>
             Token Address: {mint.toBase58()}
           </Typography>
         ) : null}

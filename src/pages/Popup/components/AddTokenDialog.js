@@ -113,15 +113,15 @@ export default function AddTokenDialog({ open, onClose }) {
   return (
     <DialogForm open={open} onClose={onClose}>
       <DialogTitle>Add Token</DialogTitle>
-      <DialogContent>
+      <DialogContent style={{ paddingTop: 16, overflow: "hidden" }}>
         {tokenAccountCost ? (
-          <DialogContentText>
-            Add a token to your wallet. This will cost{' '}
-            {feeFormat.format(tokenAccountCost / LAMPORTS_PER_SOL)} SOL.
+          <DialogContentText style={{ marginBottom: 20 }}>
+            Add a token to your wallet. <br />
+            This will cost {feeFormat.format(tokenAccountCost / LAMPORTS_PER_SOL)} SOL.
           </DialogContentText>
         ) : (
-          <LoadingIndicator />
-        )}
+            <LoadingIndicator />
+          )}
         {!!popularTokens && (
           <Tabs
             value={tab}
@@ -130,9 +130,9 @@ export default function AddTokenDialog({ open, onClose }) {
             className={classes.tabs}
             onChange={(e, value) => setTab(value)}
           >
-            <Tab label="Popular Tokens" value="popular" />
-            {showSwapAddress ? <Tab label="ERC20 Token" value="erc20" /> : null}
-            <Tab label="Manual Input" value="manual" />
+            <Tab label="Popular" value="popular" style={{ fontSize: 14 }} />
+            {showSwapAddress ? <Tab label="ERC20" value="erc20" style={{ fontSize: 14 }} /> : null}
+            <Tab label="Manual Input" value="manual" style={{ fontSize: 14 }} />
           </Tabs>
         )}
         {tab === 'manual' || !popularTokens ? (
@@ -146,6 +146,8 @@ export default function AddTokenDialog({ open, onClose }) {
               onChange={(e) => setMintAddress(e.target.value)}
               autoFocus
               disabled={sending}
+              inputProps={{ style: { fontSize: 14 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 14 } }} // font size of input label
             />
             <TextField
               label="Token Name"
@@ -155,6 +157,8 @@ export default function AddTokenDialog({ open, onClose }) {
               value={tokenName}
               onChange={(e) => setTokenName(e.target.value)}
               disabled={sending}
+              inputProps={{ style: { fontSize: 14 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 14 } }} // font size of input label
             />
             <TextField
               label="Token Symbol"
@@ -164,10 +168,12 @@ export default function AddTokenDialog({ open, onClose }) {
               value={tokenSymbol}
               onChange={(e) => setTokenSymbol(e.target.value)}
               disabled={sending}
+              inputProps={{ style: { fontSize: 14 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 14 } }} // font size of input label
             />
           </React.Fragment>
         ) : tab === 'popular' ? (
-          <List disablePadding>
+          <List disablePadding style={{ overflow: "scroll", height: 350 }}>
             {popularTokens.map((token) => (
               <TokenListItem
                 key={token.mintAddress}
@@ -192,6 +198,8 @@ export default function AddTokenDialog({ open, onClose }) {
               onChange={(e) => setErc20Address(e.target.value.trim())}
               autoFocus
               disabled={sending}
+              inputProps={{ style: { fontSize: 14 } }} // font size of input text
+              InputLabelProps={{ style: { fontSize: 14 } }} // font size of input label
             />
             {erc20Address && valid ? (
               <Link
@@ -205,7 +213,7 @@ export default function AddTokenDialog({ open, onClose }) {
           </>
         ) : null}
       </DialogContent>
-      <DialogActions>
+      <DialogActions style={{ marginRight: 8, marginBottom: 4 }}>
         <Button onClick={onClose}>Cancel</Button>
         {tab !== 'popular' && (
           <Button
@@ -246,6 +254,7 @@ function TokenListItem({
                   `https://explorer.solana.com/account/${mintAddress}` +
                   urlSuffix
                 }
+                style={{ fontSize: 14 }}
               >
                 {tokenName ?? abbreviateAddress(mintAddress)}
                 {tokenSymbol ? ` (${tokenSymbol})` : null}
@@ -259,6 +268,7 @@ function TokenListItem({
           color="primary"
           disabled={disabled || alreadyExists}
           onClick={() => onSubmit({ tokenName, tokenSymbol, mintAddress })}
+          style={{ fontSize: 14 }}
         >
           {alreadyExists ? 'Added' : 'Add'}
         </Button>
