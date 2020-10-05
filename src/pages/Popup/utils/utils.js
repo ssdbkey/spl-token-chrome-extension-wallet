@@ -74,3 +74,9 @@ export async function confirmTransaction(connection, signature) {
   );
   return result;
 }
+
+export function openExpandPopup(route) {
+  chrome.tabs.create({
+    url: `popup.html#${route}`,
+  });
+}

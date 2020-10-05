@@ -12,6 +12,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import { useCallAsync, useSendTransaction } from '../utils/notifications';
 import { swapApiRequest, useSwapApiGet } from '../utils/swap/api';
 import { showSwapAddress } from '../utils/config';
+import { useLedgerInfo } from '../utils/wallet'
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -104,12 +105,23 @@ function SendSplDialog({ onClose, publicKey, balanceInfo, onSubmitRef }) {
     transferAmountString,
     validAmount,
   } = useForm(balanceInfo);
+  const [isLedger, ledgerPubKey] = useLedgerInfo();
   const { decimals } = balanceInfo;
 
   async function makeTransaction() {
     let amount = Math.round(parseFloat(transferAmountString) * 10 ** decimals);
     if (!amount || amount <= 0) {
       throw new Error('Invalid amount');
+    }
+    if (isLedger) {
+      const source = new PublicKey(ledgerPubKey);
+      if (source.equals(publicKey)) {
+        return wallet.transferSolFromLedger(
+          source,
+          new PublicKey(destinationAddress),
+          amount,
+        );
+      }
     }
     return wallet.transferToken(
       publicKey,

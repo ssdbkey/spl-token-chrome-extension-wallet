@@ -14,6 +14,7 @@ import LoadingIndicator from './components/LoadingIndicator';
 import { SnackbarProvider } from 'notistack';
 import PopupPage from './pages/PopupPage';
 import LoginPage from './pages/LoginPage';
+import LedgerPage from './pages/LedgerPage';
 
 export default function App() {
   // TODO: add toggle for dark mode
@@ -56,6 +57,9 @@ export default function App() {
 
 function PageContents() {
   const wallet = useWallet();
+  if (window.location.href.includes('/ledger-connect')) {
+    return <LedgerPage />;
+  }
   if (!wallet) {
     return <LoginPage />;
   }

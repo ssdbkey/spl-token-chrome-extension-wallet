@@ -31,7 +31,7 @@ export default function LoginPage() {
             <br />
             <Link style={{ cursor: 'pointer' }} onClick={() => setRestore(true)}>
               Restore existing wallet
-          </Link>
+            </Link>
           </>
         )}
     </Container>

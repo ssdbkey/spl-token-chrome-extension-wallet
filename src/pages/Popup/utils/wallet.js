@@ -1,7 +1,9 @@
 import React, { useContext, useMemo } from 'react';
+import * as bs58 from 'bs58';
 import * as bip32 from 'bip32';
 import { Account, SystemProgram } from '@solana/web3.js';
 import nacl from 'tweetnacl';
+import { PublicKey } from '@solana/web3.js'
 import {
   setInitialAccountInfo,
   useAccountInfo,
@@ -22,6 +24,7 @@ import { useListener, useLocalStorageState } from './utils';
 import { useTokenName } from './tokens/names';
 import { refreshCache, useAsyncData } from './fetch-loop';
 import { getUnlockedMnemonicAndSeed, walletSeedChanged } from './wallet-seed';
+import { ledger_sign_transaction } from './ledger'
 
 export class Wallet {
   constructor(connection, seed, walletIndex = 0) {
@@ -95,6 +98,34 @@ export class Wallet {
       [this.account],
     );
   };
+
+  transferTokenFromLedger = async (source, destination, amount, memo = null) => {
+    return await transferTokens({
+      connection: this.connection,
+      owner: this.account,
+      sourcePublicKey: source,
+      destinationPublicKey: destination,
+      amount,
+      memo,
+    });
+  };
+
+  transferSolFromLedger = async (source, destination, amount, memo = null) => {
+    if (memo) {
+      throw new Error('Memo not implemented');
+    }
+    const tx = SystemProgram.transfer({
+      fromPubkey: source,
+      toPubkey: destination,
+      lamports: amount,
+    })
+    tx.recentBlockhash = (await this.connection.getRecentBlockhash('root')).blockhash;
+    const sig_bytes = await ledger_sign_transaction(tx);
+    tx.addSignature(source, sig_bytes);
+    console.log("--- verifies:", tx.verifySignatures());
+    console.log(111, tx)
+    return await this.connection.sendRawTransaction(tx.serialize());
+  };
 }
 
 const WalletContext = React.createContext(null);
@@ -124,12 +155,22 @@ export function useWallet() {
   return useContext(WalletContext).wallet;
 }
 
+export function useLedgerInfo() {
+  const { walletIndex } = useContext(WalletContext);
+  const [walletCount] = useLocalStorageState('walletCount', 1);
+  const [ledgerPubKey] = useLocalStorageState('ledgerPubKey', '');
+
+  return [ledgerPubKey && walletIndex === walletCount - 1, ledgerPubKey];
+}
+
 export function useWalletPublicKeys() {
   let wallet = useWallet();
+  const [isLedger, ledgerPubKey] = useLedgerInfo();
   let [tokenAccountInfo, loaded] = useAsyncData(
     wallet.getTokenAccountInfo,
     wallet.getTokenAccountInfo,
   );
+
   const getPublicKeys = () => [
     wallet.account.publicKey,
     ...(tokenAccountInfo
@@ -142,6 +183,10 @@ export function useWalletPublicKeys() {
 
   // Prevent users from re-rendering unless the list of public keys actually changes
   let publicKeys = useMemo(getPublicKeys, [serialized]);
+
+  if (isLedger) {
+    return [[new PublicKey(ledgerPubKey)], true];
+  }
   return [publicKeys, loaded];
 }
 
@@ -221,10 +266,16 @@ export function useBalanceInfo(publicKey) {
 export function useWalletSelector() {
   const { walletIndex, setWalletIndex, seed } = useContext(WalletContext);
   const [walletCount, setWalletCount] = useLocalStorageState('walletCount', 1);
-  function selectWallet(walletIndex) {
-    if (walletIndex >= walletCount) {
-      setWalletCount(walletIndex + 1);
+  const [ledgerPubKey, setLedgerPubKey] = useLocalStorageState('ledgerPubKey', '');
+  function selectWallet(walletIndex, ledgerPublicKey = '') {
+    if (ledgerPublicKey) {
+      setLedgerPubKey(ledgerPublicKey);
     }
+
+    if (ledgerPublicKey || walletIndex >= walletCount) {
+      setWalletCount(walletCount + 1);
+    }
+
     setWalletIndex(walletIndex);
   }
   const addresses = useMemo(() => {
@@ -233,10 +284,14 @@ export function useWalletSelector() {
     }
     const seedBuffer = Buffer.from(seed, 'hex');
     return [...Array(walletCount).keys()].map(
-      (walletIndex) =>
-        Wallet.getAccountFromSeed(seedBuffer, walletIndex).publicKey,
+      (walletIndex) => {
+        if (ledgerPubKey && walletIndex === walletCount - 1) {
+          return "Ledger";
+        }
+        return Wallet.getAccountFromSeed(seedBuffer, walletIndex).publicKey;
+      }
     );
-  }, [seed, walletCount]);
+  }, [ledgerPubKey, seed, walletCount]);
   return { addresses, walletIndex, setWalletIndex: selectWallet };
 }
 

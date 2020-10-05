@@ -20,6 +20,7 @@ export function useSendTransaction() {
     setSending(true);
     try {
       let signature = await signaturePromise;
+      console.log(222, signature)
       closeSnackbar(id);
       id = enqueueSnackbar('Confirming transaction...', {
         variant: 'info',

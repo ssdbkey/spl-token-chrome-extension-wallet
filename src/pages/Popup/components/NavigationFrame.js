@@ -4,20 +4,18 @@ import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { useConnectionConfig, MAINNET_URL } from '../utils/connection';
-import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import { clusterApiUrl } from '@solana/web3.js';
 import { useWalletSelector } from '../utils/wallet';
+import { openExpandPopup } from '../utils/utils'
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import CheckIcon from '@material-ui/icons/Check';
 import AddIcon from '@material-ui/icons/Add';
 import AccountIcon from '@material-ui/icons/AccountCircle';
 import Divider from '@material-ui/core/Divider';
-import Hidden from '@material-ui/core/Hidden';
 import IconButton from '@material-ui/core/IconButton';
 import SolanaIcon from './SolanaIcon';
-import CodeIcon from '@material-ui/icons/Code';
 import Tooltip from '@material-ui/core/Tooltip';
 
 const useStyles = makeStyles((theme) => ({
@@ -69,30 +67,19 @@ function NetworkSelector() {
     'http://localhost:8899',
   ];
 
-  const networkLabels = {
-    [MAINNET_URL]: 'Mainnet Beta',
-    [clusterApiUrl('devnet')]: 'Devnet',
-    [clusterApiUrl('testnet')]: 'Testnet',
-  };
+  // const networkLabels = {
+  //   [MAINNET_URL]: 'Mainnet Beta',
+  //   [clusterApiUrl('devnet')]: 'Devnet',
+  //   [clusterApiUrl('testnet')]: 'Testnet',
+  // };
 
   return (
     <>
-      <Hidden xsDown>
-        <Button
-          color="inherit"
-          onClick={(e) => setAnchorEl(e.target)}
-          className={classes.button}
-        >
-          {networkLabels[endpoint] ?? 'Network'}
-        </Button>
-      </Hidden>
-      <Hidden smUp>
-        <Tooltip title="Select Network" arrow>
-          <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
-            <SolanaIcon />
-          </IconButton>
-        </Tooltip>
-      </Hidden>
+      <Tooltip title="Select Network" arrow>
+        <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
+          <SolanaIcon />
+        </IconButton>
+      </Tooltip>
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
@@ -135,22 +122,11 @@ function WalletSelector() {
 
   return (
     <>
-      <Hidden xsDown>
-        <Button
-          color="inherit"
-          onClick={(e) => setAnchorEl(e.target)}
-          className={classes.button}
-        >
-          Account
-        </Button>
-      </Hidden>
-      <Hidden smUp>
-        <Tooltip title="Select Account" arrow>
-          <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
-            <AccountIcon />
-          </IconButton>
-        </Tooltip>
-      </Hidden>
+      <Tooltip title="Select Account" arrow>
+        <IconButton color="inherit" onClick={(e) => setAnchorEl(e.target)}>
+          <AccountIcon />
+        </IconButton>
+      </Tooltip>
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
@@ -161,22 +137,29 @@ function WalletSelector() {
         }}
         getContentAnchorEl={null}
       >
-        {addresses.map((address, index) => (
-          <MenuItem
-            key={address.toBase58()}
-            onClick={() => {
-              setAnchorEl(null);
-              setWalletIndex(index);
-            }}
-            selected={index === walletIndex}
-            style={{ padding: "0px 16px" }}
-          >
-            <ListItemIcon className={classes.menuItemIcon}>
-              {index === walletIndex ? <CheckIcon fontSize="small" /> : null}
-            </ListItemIcon>
-            <Typography style={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis" }}>{address.toBase58()}</Typography>
-          </MenuItem>
-        ))}
+        {addresses.map((address, index) => {
+          let pubKey = address;
+          if (address !== 'Ledger') {
+            pubKey = address.toBase58();
+          }
+
+          return (
+            <MenuItem
+              key={pubKey}
+              onClick={() => {
+                setAnchorEl(null);
+                setWalletIndex(index);
+              }}
+              selected={index === walletIndex}
+              style={{ padding: "0px 16px" }}
+            >
+              <ListItemIcon className={classes.menuItemIcon}>
+                {index === walletIndex ? <CheckIcon fontSize="small" /> : null}
+              </ListItemIcon>
+              <Typography style={{ fontSize: 12, overflow: "hidden", textOverflow: "ellipsis" }}>{pubKey}</Typography>
+            </MenuItem>
+          )
+        })}
         <Divider />
         <MenuItem
           onClick={() => {
@@ -189,6 +172,17 @@ function WalletSelector() {
             <AddIcon fontSize="small" />
           </ListItemIcon>
           <Typography style={{ fontSize: 12 }}>Create Account</Typography>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            openExpandPopup('/ledger-connect');
+          }}
+          style={{ padding: "0px 16px" }}
+        >
+          <ListItemIcon className={classes.menuItemIcon}>
+            <AddIcon fontSize="small" />
+          </ListItemIcon>
+          <Typography style={{ fontSize: 12 }}>Connect Ledger</Typography>
         </MenuItem>
       </Menu>
     </>
