@@ -9,6 +9,7 @@ import {
   refreshWalletPublicKeys,
   useWallet,
   useWalletTokenAccounts,
+  useLedgerInfo,
 } from '../utils/wallet';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { TOKENS, useUpdateTokenName } from '../utils/tokens/names';
@@ -57,6 +58,7 @@ export default function AddTokenDialog({ open, onClose }) {
   const { endpoint } = useConnectionConfig();
   const popularTokens = TOKENS[endpoint];
   const [walletAccounts] = useWalletTokenAccounts();
+  const [isLedger, ledgerPubKey] = useLedgerInfo();
 
   const [tab, setTab] = useState(!!popularTokens ? 'popular' : 'manual');
   const [mintAddress, setMintAddress] = useState('');
@@ -102,6 +104,9 @@ export default function AddTokenDialog({ open, onClose }) {
 
     let mint = new PublicKey(mintAddress);
     updateTokenName(mint, tokenName, tokenSymbol);
+    if (isLedger) {
+      return await wallet.createTokenAccountForLedger(new PublicKey(ledgerPubKey), mint);
+    }
     return await wallet.createTokenAccount(mint);
   }
 

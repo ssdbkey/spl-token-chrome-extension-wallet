@@ -1,5 +1,4 @@
 import React, { useContext, useMemo } from 'react';
-import * as bs58 from 'bs58';
 import * as bip32 from 'bip32';
 import { Account, SystemProgram } from '@solana/web3.js';
 import nacl from 'tweetnacl';
@@ -11,6 +10,7 @@ import {
 } from './connection';
 import {
   createAndInitializeTokenAccount,
+  createAndInitializeTokenAccountForLedger,
   getOwnedTokenAccounts,
   transferTokens,
 } from './tokens';
@@ -60,6 +60,15 @@ export class Wallet {
     return await createAndInitializeTokenAccount({
       connection: this.connection,
       payer: this.account,
+      mintPublicKey: tokenAddress,
+      newAccount: new Account(),
+    });
+  };
+
+  createTokenAccountForLedger = async (ledgerPubKey, tokenAddress) => {
+    return await createAndInitializeTokenAccountForLedger({
+      connection: this.connection,
+      ledgerPubKey,
       mintPublicKey: tokenAddress,
       newAccount: new Account(),
     });
@@ -122,8 +131,6 @@ export class Wallet {
     tx.recentBlockhash = (await this.connection.getRecentBlockhash('root')).blockhash;
     const sig_bytes = await ledger_sign_transaction(tx);
     tx.addSignature(source, sig_bytes);
-    console.log("--- verifies:", tx.verifySignatures());
-    console.log(111, tx)
     return await this.connection.sendRawTransaction(tx.serialize());
   };
 }

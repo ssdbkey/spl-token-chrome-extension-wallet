@@ -8,6 +8,7 @@ import {
   transfer,
 } from './instructions';
 import { ACCOUNT_LAYOUT, getOwnedAccountsFilters, MINT_LAYOUT } from './data';
+import { ledger_sign_transaction } from '../ledger'
 import bs58 from 'bs58';
 
 export async function getOwnedTokenAccounts(connection, publicKey) {
@@ -22,9 +23,9 @@ export async function getOwnedTokenAccounts(connection, publicKey) {
   if (resp.error) {
     throw new Error(
       'failed to get token accounts owned by ' +
-        publicKey.toBase58() +
-        ': ' +
-        resp.error.message,
+      publicKey.toBase58() +
+      ': ' +
+      resp.error.message,
     );
   }
   return resp.result
@@ -137,6 +138,36 @@ export async function createAndInitializeTokenAccount({
   );
   let signers = [payer, newAccount];
   return await connection.sendTransaction(transaction, signers);
+}
+
+export async function createAndInitializeTokenAccountForLedger({
+  connection,
+  ledgerPubKey,
+  mintPublicKey,
+  newAccount,
+}) {
+  let transaction = SystemProgram.createAccount({
+    fromPubkey: ledgerPubKey,
+    newAccountPubkey: newAccount.publicKey,
+    lamports: await connection.getMinimumBalanceForRentExemption(
+      ACCOUNT_LAYOUT.span,
+    ),
+    space: ACCOUNT_LAYOUT.span,
+    programId: TOKEN_PROGRAM_ID,
+  });
+  transaction.add(
+    initializeAccount({
+      account: newAccount.publicKey,
+      mint: mintPublicKey,
+      owner: ledgerPubKey,
+    }),
+  );
+  transaction.recentBlockhash = (await connection.getRecentBlockhash('root')).blockhash;
+  const sig_bytes = await ledger_sign_transaction(transaction);
+  transaction.addSignature(ledgerPubKey, sig_bytes);
+  transaction.addSigner(newAccount);
+
+  return await connection.sendRawTransaction(transaction.serialize());
 }
 
 export async function transferTokens({

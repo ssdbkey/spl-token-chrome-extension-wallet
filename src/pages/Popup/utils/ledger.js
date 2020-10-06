@@ -1,7 +1,6 @@
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 const { TransportError } = require("@ledgerhq/errors");
 const bs58 = require("bs58");
-const solana = require("@solana/web3.js");
 
 const INS_GET_PUBKEY = 0x05;
 const INS_SIGN_MESSAGE = 0x06;
@@ -149,43 +148,4 @@ export async function ledger_sign_transaction(transaction) {
     var transport = await TransportWebUSB.create(INTERACTION_TIMEOUT);
     let from_derivation_path = solana_derivation_path();
     return await solana_ledger_sign_transaction(transport, from_derivation_path, transaction);
-    // return bs58.encode(sig_bytes);
 }
-
-// (async () => {
-//     var transport = await Transport.create();
-
-//     const from_derivation_path = solana_derivation_path();
-//     const from_pubkey_bytes = await solana_ledger_get_pubkey(transport, from_derivation_path);
-//     const from_pubkey_string = bs58.encode(from_pubkey_bytes);
-//     console.log("---", from_pubkey_string);
-
-//     const to_derivation_path = solana_derivation_path(1);
-//     const to_pubkey_bytes = await solana_ledger_get_pubkey(transport, to_derivation_path);
-//     const to_pubkey_string = bs58.encode(to_pubkey_bytes);
-//     console.log("---", to_pubkey_string);
-
-//     const from_pubkey = new solana.PublicKey(from_pubkey_string);
-//     const to_pubkey = new solana.PublicKey(to_pubkey_string);
-//     var tx = solana.SystemProgram.transfer({
-//         fromPubkey: from_pubkey,
-//         toPubkey: to_pubkey,
-//         lamports: 42,
-//     })
-
-//     // XXX: Fake blockhash so this example doesn't need a
-//     // network connection. It should be queried from the
-//     // cluster in normal use.
-//     tx.recentBlockhash = bs58.encode(Buffer.from([
-//         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-//         3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-//     ]));
-
-//     const sig_bytes = await solana_ledger_sign_transaction(transport, from_derivation_path, tx);
-
-//     const sig_string = bs58.encode(sig_bytes);
-//     console.log("--- len:", sig_bytes.length, "sig:", sig_string);
-
-//     tx.addSignature(from_pubkey, sig_bytes);
-//     console.log("--- verifies:", tx.verifySignatures());
-// })().catch(e => console.log(e));
