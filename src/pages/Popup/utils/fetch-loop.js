@@ -149,7 +149,7 @@ export function useAsyncData(
 
   useEffect(() => {
     if (!cacheKey) {
-      return () => {};
+      return () => { };
     }
     const listener = new FetchLoopListener(
       cacheKey,

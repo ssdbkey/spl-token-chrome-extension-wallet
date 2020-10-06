@@ -27,11 +27,17 @@ import { getUnlockedMnemonicAndSeed, walletSeedChanged } from './wallet-seed';
 import { ledger_sign_transaction } from './ledger'
 
 export class Wallet {
-  constructor(connection, seed, walletIndex = 0) {
+  constructor(connection, seed, walletIndex = 0, isLedger = false, ledgerPubKey = '') {
     this.connection = connection;
     this.seed = seed;
     this.walletIndex = walletIndex;
-    this.account = Wallet.getAccountFromSeed(this.seed, this.walletIndex);
+    if (isLedger) {
+      this.account = {
+        publicKey: new PublicKey(ledgerPubKey)
+      };
+    } else {
+      this.account = Wallet.getAccountFromSeed(this.seed, this.walletIndex);
+    }
   }
 
   static getAccountFromSeed(seed, walletIndex, accountIndex = 0) {
@@ -142,12 +148,14 @@ export function WalletProvider({ children }) {
   const { mnemonic, seed } = getUnlockedMnemonicAndSeed();
   const connection = useConnection();
   const [walletIndex, setWalletIndex] = useLocalStorageState('walletIndex', 0);
+  const [walletCount] = useLocalStorageState('walletCount', 1);
+  const [ledgerPubKey] = useLocalStorageState('ledgerPubKey', '');
   const wallet = useMemo(
     () =>
       seed
-        ? new Wallet(connection, Buffer.from(seed, 'hex'), walletIndex)
+        ? new Wallet(connection, Buffer.from(seed, 'hex'), walletIndex, ledgerPubKey && walletIndex === walletCount - 1, ledgerPubKey)
         : null,
-    [connection, seed, walletIndex],
+    [connection, ledgerPubKey, seed, walletCount, walletIndex],
   );
   return (
     <WalletContext.Provider
@@ -179,7 +187,7 @@ export function useWalletPublicKeys() {
   );
 
   const getPublicKeys = () => [
-    wallet.account.publicKey,
+    isLedger ? new PublicKey(ledgerPubKey) : wallet.account.publicKey,
     ...(tokenAccountInfo
       ? tokenAccountInfo.map(({ publicKey }) => publicKey)
       : []),
@@ -191,9 +199,6 @@ export function useWalletPublicKeys() {
   // Prevent users from re-rendering unless the list of public keys actually changes
   let publicKeys = useMemo(getPublicKeys, [serialized]);
 
-  if (isLedger) {
-    return [[new PublicKey(ledgerPubKey)], true];
-  }
   return [publicKeys, loaded];
 }
 

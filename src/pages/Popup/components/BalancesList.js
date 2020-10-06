@@ -47,6 +47,7 @@ export default function BalancesList() {
   const wallet = useWallet();
   const [publicKeys, loaded] = useWalletPublicKeys();
   const [showAddTokenDialog, setShowAddTokenDialog] = useState(false);
+  console.log(123, JSON.stringify(publicKeys), loaded)
 
   return (
     <Paper>
