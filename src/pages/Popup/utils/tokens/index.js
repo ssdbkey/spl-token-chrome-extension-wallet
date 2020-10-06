@@ -192,3 +192,35 @@ export async function transferTokens({
   let signers = [owner];
   return await connection.sendTransaction(transaction, signers);
 }
+
+export async function transferTokensFromLedger({
+  connection,
+  ledgerPubKey,
+  sourcePublicKey,
+  destinationPublicKey,
+  amount,
+  memo,
+}) {
+  console.log(111, ledgerPubKey, sourcePublicKey, destinationPublicKey, amount)
+  let transaction = new Transaction().add(
+    transfer({
+      source: sourcePublicKey,
+      destination: destinationPublicKey,
+      owner: ledgerPubKey,
+      amount,
+    }),
+  );
+  console.log(112, transaction)
+  if (memo) {
+    transaction.add(memoInstruction(memo));
+  }
+  console.log(113, transaction)
+  transaction.recentBlockhash = (await connection.getRecentBlockhash('root')).blockhash;
+  console.log(114, transaction)
+  const sig_bytes = await ledger_sign_transaction(transaction);
+  console.log(115, transaction)
+  transaction.addSignature(ledgerPubKey, sig_bytes);
+  console.log(116, transaction)
+  // let signers = [owner];
+  return await connection.sendRawTransaction(transaction.serialize());
+}

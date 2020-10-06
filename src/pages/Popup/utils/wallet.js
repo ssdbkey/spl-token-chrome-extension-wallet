@@ -13,6 +13,7 @@ import {
   createAndInitializeTokenAccountForLedger,
   getOwnedTokenAccounts,
   transferTokens,
+  transferTokensFromLedger,
 } from './tokens';
 import { TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT } from './tokens/instructions';
 import {
@@ -114,10 +115,10 @@ export class Wallet {
     );
   };
 
-  transferTokenFromLedger = async (source, destination, amount, memo = null) => {
-    return await transferTokens({
+  transferTokenFromLedger = async (ledgerPubKey, source, destination, amount, memo = null) => {
+    return await transferTokensFromLedger({
       connection: this.connection,
-      owner: this.account,
+      ledgerPubKey,
       sourcePublicKey: source,
       destinationPublicKey: destination,
       amount,
@@ -180,14 +181,13 @@ export function useLedgerInfo() {
 
 export function useWalletPublicKeys() {
   let wallet = useWallet();
-  const [isLedger, ledgerPubKey] = useLedgerInfo();
   let [tokenAccountInfo, loaded] = useAsyncData(
     wallet.getTokenAccountInfo,
     wallet.getTokenAccountInfo,
   );
 
   const getPublicKeys = () => [
-    isLedger ? new PublicKey(ledgerPubKey) : wallet.account.publicKey,
+    wallet.account.publicKey,
     ...(tokenAccountInfo
       ? tokenAccountInfo.map(({ publicKey }) => publicKey)
       : []),

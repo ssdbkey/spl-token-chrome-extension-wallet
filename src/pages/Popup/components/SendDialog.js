@@ -121,6 +121,13 @@ function SendSplDialog({ onClose, publicKey, balanceInfo, onSubmitRef }) {
           new PublicKey(destinationAddress),
           amount,
         );
+      } else {
+        return wallet.transferTokenFromLedger(
+          new PublicKey(ledgerPubKey),
+          publicKey,
+          new PublicKey(destinationAddress),
+          amount,
+        )
       }
     }
     return wallet.transferToken(
